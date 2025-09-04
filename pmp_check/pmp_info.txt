@@ -1,0 +1,34 @@
+Domain0 Region00            : 0x0000000000100000-0x0000000000100fff M: (I,R,W) S/U: (R,W)
+Domain0 Region01            : 0x0000000010000000-0x0000000010000fff M: (I,R,W) S/U: (R,W)
+Domain0 Region02            : 0x0000000024000000-0x0000000024000fff M: (I,R,W) S/U: ()
+Domain0 Region03            : 0x0000000025000000-0x0000000025000fff M: (I,R,W) S/U: ()
+Domain0 Region04            : 0x0000000002000000-0x000000000200ffff M: (I,R,W) S/U: ()
+Domain0 Region05            : 0x000000000c000000-0x000000000c00ffff M: (I,R,W) S/U: ()
+Domain0 Region06            : 0x0000000080080000-0x000000008009ffff M: (R,W) S/U: ()
+Domain0 Region07            : 0x0000000080000000-0x000000008007ffff M: (R,X) S/U: ()
+Domain0 Region08            : 0x0000000000000000-0xffffffffffffffff M: () S/U: (R,W,X)
+
+
+(gdb) i r mseccfg
+mseccfg        0x205      517
+(gdb) i r pmpcfg0
+pmpcfg0        0x9b9b9b9b9b1e1e00       -7234017283815891456
+(gdb) i r pmpcfg2
+pmpcfg2        0x1f9d   8093
+(gdb) i r pmpaddr0 pmpaddr1 pmpaddr2 pmpaddr3 pmpaddr4 pmpaddr5 pmpaddr6 pmpaddr7 pmpaddr8 pmpaddr9 pmpaddr10 pmpaddr11 pmpaddr12 pmpaddr13 pmpaddr14 pmpaddr15
+pmpaddr0       0x20d96a5f       551119455
+pmpaddr1       0x401ff  262655
+pmpaddr2       0x40001ff        67109375
+pmpaddr3       0x90001ff        150995455
+pmpaddr4       0x94001ff        155189759
+pmpaddr5       0x801fff 8396799
+pmpaddr6       0x3001fff        50339839
+pmpaddr7       0x20023fff       537018367
+pmpaddr8       0x2000ffff       536936447
+pmpaddr9       0xffffffffffffffff       -1
+pmpaddr10      0x0      0
+pmpaddr11      0x0      0
+pmpaddr12      0x0      0
+pmpaddr13      0x0      0
+pmpaddr14      0x0      0
+pmpaddr15      0x0      0
