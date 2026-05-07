@@ -38,7 +38,7 @@ define vatopa-silent
   set $satp = 0
   set $pte = ((unsigned long *)$pt)[$idx]
   if (($pte & $PTE_V) == 0)
-    printf "Invalid L1 PTE 0x%lx @ 0x%lx\n", $pte, ((unsigned long *)$pt)+$idx
+    printf "Invalid L2 PTE 0x%lx @ 0x%lx\n", $pte, ((unsigned long *)$pt)+$idx
   else
     set $pa = (($pte >> $PTE_PA_S) & $PTE_PA_M) << $PAGE_SHIFT
     if (($pte & $PTE_XWR) != 0)
@@ -48,22 +48,22 @@ define vatopa-silent
       set $idx = ($va >> $VPN_1) & $VPN_MASK
       set $pte = ((unsigned long *)$pt)[$idx]
       if (($pte & $PTE_V) == 0)
-  printf "Invalid L2 PTE 0x%lx @ 0x%lx\n", $pte, ((unsigned long *)$pt)+$idx
+        printf "Invalid L1 PTE 0x%lx @ 0x%lx\n", $pte, ((unsigned long *)$pt)+$idx
       else
-  set $pa = (($pte >> $PTE_PA_S) & $PTE_PA_M) << $PAGE_SHIFT
-  if (($pte & $PTE_XWR) != 0)
-    set $pa = $pa | ($va & $MEGAPAGE_MASK)
-  else
-    set $pt = $pa
-    set $idx = ($va >> $VPN_0) & $VPN_MASK
-    set $pte = ((unsigned long *)$pt)[$idx]
-    if (($pte & $PTE_V) == 0)
-      printf "Invalid L3 PTE 0x%lx @ 0x%lx\n", $pte, ((unsigned long *)$pt)+$idx
-    else
-      set $pa = (($pte >> $PTE_PA_S) & $PTE_PA_M) << $PAGE_SHIFT
-      set $pa = $pa | ($va & $PAGE_MASK)
-    end
-  end
+        set $pa = (($pte >> $PTE_PA_S) & $PTE_PA_M) << $PAGE_SHIFT
+        if (($pte & $PTE_XWR) != 0)
+          set $pa = $pa | ($va & $MEGAPAGE_MASK)
+        else
+          set $pt = $pa
+          set $idx = ($va >> $VPN_0) & $VPN_MASK
+          set $pte = ((unsigned long *)$pt)[$idx]
+          if (($pte & $PTE_V) == 0)
+            printf "Invalid L0 PTE 0x%lx @ 0x%lx\n", $pte, ((unsigned long *)$pt)+$idx
+          else
+            set $pa = (($pte >> $PTE_PA_S) & $PTE_PA_M) << $PAGE_SHIFT
+            set $pa = $pa | ($va & $PAGE_MASK)
+          end
+        end
       end
     end
   end
@@ -131,12 +131,12 @@ define vatopa
   set $satp = 0
   set $pte = ((unsigned long *)$pt)[$idx]
   if (($pte & $PTE_V) == 0)
-    printf "Invalid L1 PTE 0x%lx @ 0x%lx\n", $pte, ((unsigned long *)$pt)+$idx
+    printf "Invalid L2 PTE 0x%lx @ 0x%lx\n", $pte, ((unsigned long *)$pt)+$idx
   else
     set $pa = (($pte >> $PTE_PA_S) & $PTE_PA_M) << $PAGE_SHIFT
     if (($pte & $PTE_XWR) != 0)
       set $pa = $pa | ($va & $GIGAPAGE_MASK)
-      printf "PA 0x%lx"
+      printf "PA 0x%lx", $pa
       pte-print-meta $pte
       printf " (gigapage)\n"
     else
@@ -144,28 +144,28 @@ define vatopa
       set $idx = ($va >> $VPN_1) & $VPN_MASK
       set $pte = ((unsigned long *)$pt)[$idx]
       if (($pte & $PTE_V) == 0)
-  printf "Invalid L2 PTE 0x%lx @ 0x%lx\n", $pte, ((unsigned long *)$pt)+$idx
+        printf "Invalid L1 PTE 0x%lx @ 0x%lx\n", $pte, ((unsigned long *)$pt)+$idx
       else
-  set $pa = (($pte >> $PTE_PA_S) & $PTE_PA_M) << $PAGE_SHIFT
-  if (($pte & $PTE_XWR) != 0)
-    set $pa = $pa | ($va & $MEGAPAGE_MASK)
-    printf "PA 0x%lx", $pa
-    pte-print-meta $pte
-    printf " (megapage)\n"
-  else
-    set $pt = $pa
-    set $idx = ($va >> $VPN_0) & $VPN_MASK
-    set $pte = ((unsigned long *)$pt)[$idx]
-    if (($pte & $PTE_V) == 0)
-      printf "Invalid L3 PTE 0x%lx @ 0x%lx\n", $pte, ((unsigned long *)$pt)+$idx
-    else
-      set $pa = (($pte >> $PTE_PA_S) & $PTE_PA_M) << $PAGE_SHIFT
-      set $pa = $pa | ($va & $PAGE_MASK)
-      printf "PA 0x%lx", $pa
-      pte-print-meta $pte
-      printf "\n"
-    end
-  end
+        set $pa = (($pte >> $PTE_PA_S) & $PTE_PA_M) << $PAGE_SHIFT
+        if (($pte & $PTE_XWR) != 0)
+          set $pa = $pa | ($va & $MEGAPAGE_MASK)
+          printf "PA 0x%lx", $pa
+          pte-print-meta $pte
+          printf " (megapage)\n"
+        else
+          set $pt = $pa
+          set $idx = ($va >> $VPN_0) & $VPN_MASK
+          set $pte = ((unsigned long *)$pt)[$idx]
+          if (($pte & $PTE_V) == 0)
+            printf "Invalid L0 PTE 0x%lx @ 0x%lx\n", $pte, ((unsigned long *)$pt)+$idx
+          else
+            set $pa = (($pte >> $PTE_PA_S) & $PTE_PA_M) << $PAGE_SHIFT
+            set $pa = $pa | ($va & $PAGE_MASK)
+            printf "PA 0x%lx", $pa
+            pte-print-meta $pte
+            printf "\n"
+          end
+        end
       end
     end
   end
@@ -179,14 +179,14 @@ define vatopa-verbose
   set $satp_s = $satp
   set $satp = 0
   set $pte = ((unsigned long *)$pt)[$idx]
-  printf "L0 PTE 0x%lx @ 0x%lx\n", $pte, ((unsigned long *)$pt)+$idx
+  printf "L2 PTE 0x%lx @ 0x%lx\n", $pte, ((unsigned long *)$pt)+$idx
   if (($pte & $PTE_V) == 0)
-    printf "Invalid L1 PTE 0x%lx @ 0x%lx\n", $pte, ((unsigned long *)$pt)+$idx
+    printf "Invalid L2 PTE 0x%lx @ 0x%lx\n", $pte, ((unsigned long *)$pt)+$idx
   else
     set $pa = (($pte >> $PTE_PA_S) & $PTE_PA_M) << $PAGE_SHIFT
     if (($pte & $PTE_XWR) != 0)
       set $pa = $pa | ($va & $GIGAPAGE_MASK)
-      printf "PA 0x%lx"
+      printf "PA 0x%lx", $pa
       pte-print-meta $pte
       printf " (gigapage)\n"
     else
@@ -195,29 +195,29 @@ define vatopa-verbose
       set $pte = ((unsigned long *)$pt)[$idx]
       printf "L1 PTE 0x%lx @ 0x%lx\n", $pte, ((unsigned long *)$pt)+$idx
       if (($pte & $PTE_V) == 0)
-  printf "Invalid L2 PTE 0x%lx @ 0x%lx\n", $pte, ((unsigned long *)$pt)+$idx
+        printf "Invalid L1 PTE 0x%lx @ 0x%lx\n", $pte, ((unsigned long *)$pt)+$idx
       else
-  set $pa = (($pte >> $PTE_PA_S) & $PTE_PA_M) << $PAGE_SHIFT
-  if (($pte & $PTE_XWR) != 0)
-    set $pa = $pa | ($va & $MEGAPAGE_MASK)
-    printf "PA 0x%lx", $pa
-    pte-print-meta $pte
-    printf " (megapage)\n"
-  else
-    set $pt = $pa
-    set $idx = ($va >> $VPN_0) & $VPN_MASK
-    set $pte = ((unsigned long *)$pt)[$idx]
-    printf "L2 PTE 0x%lx @ 0x%lx\n", $pte, ((unsigned long *)$pt)+$idx
-    if (($pte & $PTE_V) == 0)
-      printf "Invalid L3 PTE 0x%lx @ 0x%lx\n", $pte, ((unsigned long *)$pt)+$idx
-    else
-      set $pa = (($pte >> $PTE_PA_S) & $PTE_PA_M) << $PAGE_SHIFT
-      set $pa = $pa | ($va & $PAGE_MASK)
-      printf "PA 0x%lx", $pa
-      pte-print-meta $pte
-      printf "\n"
-    end
-  end
+        set $pa = (($pte >> $PTE_PA_S) & $PTE_PA_M) << $PAGE_SHIFT
+        if (($pte & $PTE_XWR) != 0)
+          set $pa = $pa | ($va & $MEGAPAGE_MASK)
+          printf "PA 0x%lx", $pa
+          pte-print-meta $pte
+          printf " (megapage)\n"
+        else
+          set $pt = $pa
+          set $idx = ($va >> $VPN_0) & $VPN_MASK
+          set $pte = ((unsigned long *)$pt)[$idx]
+          printf "L0 PTE 0x%lx @ 0x%lx\n", $pte, ((unsigned long *)$pt)+$idx
+          if (($pte & $PTE_V) == 0)
+            printf "Invalid L0 PTE 0x%lx @ 0x%lx\n", $pte, ((unsigned long *)$pt)+$idx
+          else
+            set $pa = (($pte >> $PTE_PA_S) & $PTE_PA_M) << $PAGE_SHIFT
+            set $pa = $pa | ($va & $PAGE_MASK)
+            printf "PA 0x%lx", $pa
+            pte-print-meta $pte
+            printf "\n"
+          end
+        end
       end
     end
   end
